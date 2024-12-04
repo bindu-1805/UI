@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+    <h1>Weather Station Dashboard</h1>
+
+    <div class="sensor-data">
+        <h2>Real-Time Weather Data</h2>
+        <p><strong>Temperature:</strong> {{ latest_data.Temperature | round(2) }} °C</p>
+        <p><strong>Humidity:</strong> {{ latest_data.Humidity | round(2) }} %</p>
+        <p><strong>Pressure:</strong> {{ latest_data.Pressure  | round(2) }} hPa</p>
+        <p><strong>Rainfall:</strong> {{ latest_data.Rainfall  | round(2) }} mm</p>
+        <p><strong>Wind Speed:</strong> {{ latest_data.Windspeed  | round(2) }} km/hr</p>
+        <p><strong>Wind Direction:</strong> {{ latest_data.Winddirection }} </p>
+    </div>
+
+    <div class="plot">
+        <h2>Historical Data</h2>
+        <img src="/plot" alt="Historical Data Plot">
+    </div>
+</body>
+</html>
