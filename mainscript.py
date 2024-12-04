@@ -35,9 +35,10 @@ GPIO.setwarnings(False)
 
 #Anemometer Variables
 HALL_SENSOR_PIN = 13
-PULSES_PER_REVOLUTION = 1
-RADIUS_CM = 1.7
+RADIUS_CM = 2.0
 CIRCUMFERENCE_CM = 2 * 3.14159 * RADIUS_CM
+lastState = GPIO.HIGH
+pulseCount = 0
 
 # Rain Gauge Variables
 RAIN_SENSOR_PIN = 5
@@ -52,6 +53,10 @@ DIRECTION_MAPPING = {
     (1, 0, 1, 1): "East",
     (1, 1, 0, 1): "South",
     (1, 1, 1, 0): "West",
+    (0, 0, 1, 0): "North East",
+    (1, 0, 0, 1): "South East",
+    (1, 1, 0, 0): "South West",
+    (0, 1, 1, 0): "North West"
 }
 
 # BME280 Setup
@@ -61,31 +66,27 @@ bus = smbus2.SMBus(I2C_PORT)
 calibration_params = bme280.load_calibration_params(bus, BME280_ADDRESS)
 
 # Function Definitions
-def calculate_wind_speed(revolutions, time_interval):
-    distance_km = (revolutions * CIRCUMFERENCE_CM) / 100000
-    return (distance_km / (time_interval / 3600))
-
-
-def read_anemometer():
-    global anemometer_speed
-    pulse_count = 0
-    start_time = time.time()
+def read_anemometer(channel):
+    global pulseCount
     GPIO.setup(HALL_SENSOR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    
-    def sensor_callback(channel):
-        nonlocal pulse_count
-        pulse_count += 1
 
-    GPIO.add_event_detect(HALL_SENSOR_PIN, GPIO.FALLING, callback=sensor_callback)
+    def pulse_detected(channel):
+        global pulseCount
+        pulseCount += 1
     
+    GPIO.add_event_detect(HALL_SENSOR_PIN, GPIO.FALLING, callback=pulse_detected, bouncetime=10)   
+
     while True:
+        pulseCount=0
+        startTime = time.time()
+        endTime = startTime + 10  # Count for 10 seconds
+        #print("Starting pulse count...")
+        while time.time() < endTime:
+            time.sleep(0.1)  # Avoid busy-waiting
+        rpm = (pulseCount / 10) * 60
+        windSpeed = (rpm*0.03)*6.0
+        #print(f"Wind Speed (m/s): {windSpeed}")
         time.sleep(1)
-        elapsed_time = time.time() - start_time
-        revolutions = pulse_count / PULSES_PER_REVOLUTION
-        anemometer_speed= calculate_wind_speed(revolutions, elapsed_time)
-        pulse_count = 0
-        start_time = time.time()
-
         
 def read_rain_gauge():
     global rainfall_mm
@@ -244,7 +245,7 @@ def log_data():
             writer = csv.writer(file)
             writer.writerow([
                 datetime.now(),
-                anemometer_speed,
+                windspeed,
                 rainfall_mm,
                 wind_direction,
                 temperature,
@@ -256,7 +257,7 @@ def log_data():
         
 # Main Execution
 if __name__ == "__main__":
-    anemometer_speed = 0
+    windspeed = 0
     rainfall_mm = 0
     wind_direction = "N/A"
     temperature, pressure, humidity = 0, 0, 0
