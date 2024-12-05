@@ -24,7 +24,7 @@ csv_file = "weather_data.csv"
 if not os.path.exists(csv_file):
     with open(csv_file,"w",newline="") as file:
         writer=csv.writer(file)
-        writer.writerow([ "Timestamp", "Wind Speed (km/h)", "Rainfall(mm)", "Wind Direction", "Temp (C)", "Pressure (hPa)", "Humidity"])
+        writer.writerow([ "Timestamp", "Windspeed (km/h)", "Rainfall", "Winddirection", "Temperature", "Pressure", "Humidity"])
         
 # Cleanup any previous configurations
 GPIO.cleanup()
