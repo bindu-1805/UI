@@ -42,8 +42,8 @@ pulseCount = 0
 
 # Rain Gauge Variables
 RAIN_SENSOR_PIN = 5
-rainfall_mm = 0
-rain_per_tip = 0.2794
+rainfall_ml = 0
+rain_per_tip = 2.5
 
 # Wind Vane Variables
 WIND_VANE_PINS = [27, 23, 17, 22]
@@ -89,12 +89,12 @@ def read_anemometer(channel):
         time.sleep(1)
         
 def read_rain_gauge():
-    global rainfall_mm
+    global rainfall_ml
     GPIO.setup(RAIN_SENSOR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     
     def sensor_callback(channel):
-        global rainfall_mm
-        rainfall_mm += rain_per_tip
+        global rainfall_ml
+        rainfall_ml += rain_per_tip
 
     GPIO.add_event_detect(RAIN_SENSOR_PIN, GPIO.BOTH,callback=sensor_callback, bouncetime=300)
     
@@ -246,7 +246,7 @@ def log_data():
             writer.writerow([
                 datetime.now(),
                 windspeed,
-                rainfall_mm,
+                rainfall_ml,
                 wind_direction,
                 temperature,
                 pressure,
@@ -258,7 +258,7 @@ def log_data():
 # Main Execution
 if __name__ == "__main__":
     windspeed = 0
-    rainfall_mm = 0
+    rainfall_ml = 0
     wind_direction = "N/A"
     temperature, pressure, humidity = 0, 0, 0
 
