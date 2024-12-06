@@ -124,7 +124,7 @@ class NovafitnessReading(object):
     """
     Describes a single reading from the Novafitness SDS018 sensor
     """
-    def _init_(self, line):
+    def __init__(self, line):
         """
         Takes a line from the Novafitness serial port and converts it into
         an object containing the data
@@ -133,7 +133,7 @@ class NovafitnessReading(object):
         self.pm10 = round(((line[5] << 8) + line[4]) / 10, 1)  # PM10 reading
         self.pm25 = round(((line[3] << 8) + line[2]) / 10, 1)  # PM2.5 reading
         
-    def _str_(self):
+    def __str__(self):
         return f"{self.timestamp},{self.pm10},{self.pm25}"
     
 class NovafitnessException(Exception):
@@ -146,7 +146,7 @@ class Novafitness(object):
     """
     Actual interface to the Novafitness sensor
     """
-    def _init_(self, port=DEFAULT_SERIAL_PORT, baud=DEFAULT_BAUD_RATE,
+    def __init__(self, port=DEFAULT_SERIAL_PORT, baud=DEFAULT_BAUD_RATE,
                  serial_timeout=DEFAULT_SERIAL_TIMEOUT, read_timeout=DEFAULT_READ_TIMEOUT,
                  log_level=DEFAULT_LOGGING_LEVEL):
         """
