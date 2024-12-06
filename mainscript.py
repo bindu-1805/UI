@@ -24,7 +24,7 @@ csv_file = "weather_data.csv"
 if not os.path.exists(csv_file):
     with open(csv_file,"w",newline="") as file:
         writer=csv.writer(file)
-        writer.writerow([ "Timestamp", "Windspeed (km/h)", "Rainfall", "Winddirection", "Temperature", "Pressure", "Humidity"])
+        writer.writerow([ "Timestamp", "Windspeed", "Rainfall", "Winddirection", "Temperature", "Pressure", "Humidity"])
         
 # Cleanup any previous configurations
 GPIO.cleanup()
@@ -66,13 +66,15 @@ bus = smbus2.SMBus(I2C_PORT)
 calibration_params = bme280.load_calibration_params(bus, BME280_ADDRESS)
 
 # Function Definitions
-def read_anemometer(channel):
-    global pulseCount
+def read_anemometer():
+    #global pulseCount
+    global windspeed
     GPIO.setup(HALL_SENSOR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     def pulse_detected(channel):
         global pulseCount
         pulseCount += 1
+        print(f"Pulse count: {pulseCount}")
     
     GPIO.add_event_detect(HALL_SENSOR_PIN, GPIO.FALLING, callback=pulse_detected, bouncetime=10)   
 
@@ -84,8 +86,9 @@ def read_anemometer(channel):
         while time.time() < endTime:
             time.sleep(0.1)  # Avoid busy-waiting
         rpm = (pulseCount / 10) * 60
-        windSpeed = (rpm*0.03)*6.0
-        #print(f"Wind Speed (m/s): {windSpeed}")
+        print(f"rpm: {rpm}")
+        windspeed = (rpm*0.03)*6.0
+        print(f"Wind Speed (m/s): {windspeed}")
         time.sleep(1)
         
 def read_rain_gauge():
@@ -122,7 +125,7 @@ class NovafitnessReading(object):
     """
     Describes a single reading from the Novafitness SDS018 sensor
     """
-    def __init__(self, line):
+    def _init_(self, line):
         """
         Takes a line from the Novafitness serial port and converts it into
         an object containing the data
@@ -131,7 +134,7 @@ class NovafitnessReading(object):
         self.pm10 = round(((line[5] << 8) + line[4]) / 10, 1)  # PM10 reading
         self.pm25 = round(((line[3] << 8) + line[2]) / 10, 1)  # PM2.5 reading
         
-    def __str__(self):
+    def _str_(self):
         return f"{self.timestamp},{self.pm10},{self.pm25}"
     
 class NovafitnessException(Exception):
@@ -144,7 +147,7 @@ class Novafitness(object):
     """
     Actual interface to the Novafitness sensor
     """
-    def __init__(self, port=DEFAULT_SERIAL_PORT, baud=DEFAULT_BAUD_RATE,
+    def _init_(self, port=DEFAULT_SERIAL_PORT, baud=DEFAULT_BAUD_RATE,
                  serial_timeout=DEFAULT_SERIAL_TIMEOUT, read_timeout=DEFAULT_READ_TIMEOUT,
                  log_level=DEFAULT_LOGGING_LEVEL):
         """
@@ -215,7 +218,7 @@ def save_to_csv(reading):
     if reading.pm10 > 0 and reading.pm25 > 0:  # Only save if valid readings
         with open("sensor_readings.csv", mode='a', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow([reading.timestamp, "pm10:", reading.pm10, reading.pm25])
+            writer.writerow([reading.timestamp, "PM10", reading.pm10, "PM2.5", reading.pm25])
             #print(f"Data saved")
     else:
         print("Invalid reading. Skipping save.")
@@ -240,6 +243,7 @@ def read_air_quality(port=DEFAULT_SERIAL_PORT, baud=DEFAULT_BAUD_RATE,
         novafitness.serial.close()
         
 def log_data():
+    global windspeed
     while True:
         with open(csv_file, "a", newline="") as file:
             writer = csv.writer(file)
