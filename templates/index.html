@@ -15,9 +15,12 @@
         <p><strong>Temperature:</strong> {{ latest_data.Temperature | round(2) }} °C</p>
         <p><strong>Humidity:</strong> {{ latest_data.Humidity | round(2) }} %</p>
         <p><strong>Pressure:</strong> {{ latest_data.Pressure  | round(2) }} hPa</p>
-        <p><strong>Rainfall:</strong> {{ latest_data.Rainfall  | round(2) }} mm</p>
+        <p><strong>Rainfall:</strong> {{ latest_data.Rainfall  | round(2) }} ml</p>
         <p><strong>Wind Speed:</strong> {{ latest_data.Windspeed  | round(2) }} km/hr</p>
         <p><strong>Wind Direction:</strong> {{ latest_data.Winddirection }} </p>
+        <p><strong>PM10:</strong> {{ latest_pm_data['PM10'] }} µg/m³</p>
+        <p><strong>PM2.5:</strong> {{ latest_pm_data['PM2.5'] }} µg/m³</p>
+
     </div>
 
     <div class="plot">
