@@ -67,8 +67,7 @@ calibration_params = bme280.load_calibration_params(bus, BME280_ADDRESS)
 
 # Function Definitions
 def read_anemometer():
-    #global pulseCount
-    global windspeed
+    global pulseCount
     GPIO.setup(HALL_SENSOR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     def pulse_detected(channel):
@@ -243,7 +242,6 @@ def read_air_quality(port=DEFAULT_SERIAL_PORT, baud=DEFAULT_BAUD_RATE,
         novafitness.serial.close()
         
 def log_data():
-    global windspeed
     while True:
         with open(csv_file, "a", newline="") as file:
             writer = csv.writer(file)
